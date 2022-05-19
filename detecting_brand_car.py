@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[134]:
+# In[8]:
 
 
 # import the libraries as shown below
@@ -18,7 +18,23 @@ from glob import glob
 import matplotlib.pyplot as plt
 
 
-# In[135]:
+# In[9]:
+
+
+# Loading all necessary libraries and modules
+import os
+import numpy as np
+import cv2 as cv
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from matplotlib import gridspec
+
+from sklearn.utils import shuffle
+from sklearn.metrics import accuracy_score, confusion_matrix
+
+
+# In[10]:
 
 
 IMAGE_SIZE = [224, 224]
@@ -26,13 +42,52 @@ train_path = 'D:/computer science/level3/semester 2/selected 2/selected2/Dataset
 valid_path = 'D:/computer science/level3/semester 2/selected 2/selected2/Datasets/Test'
 
 
-# In[136]:
+# In[11]:
 
 
 # Import the Vgg 16 library as shown below and add preprocessing layer to the front of VGG
 # Here we will be using imagenet weights
 
 resnet = ResNet50(input_shape=IMAGE_SIZE + [3], weights='imagenet', include_top=False)
+
+
+# In[12]:
+
+
+orig = cv.imread("D:/computer science/level3/semester 2/selected 2/selected2/Datasets/Train/mercedes/17.jpg")
+
+# Convert image to RGB from BGR (another way is to use "image = image[:, :, ::-1]" code)
+orig = cv.cvtColor(orig, cv.COLOR_BGR2RGB)
+
+# Resize image to 224x224 size
+image = cv.resize(orig, (224, 224)).reshape(-1, 224, 224, 3)
+
+# We need to preprocess imageto fulfill ResNet50 requirements
+image = preprocess_input(image)
+
+# Extracting our features
+features = resnet.predict(image)
+
+features.shape
+
+
+# In[13]:
+
+
+n_features = features.shape[-1]
+
+fig = plt.figure(figsize = (17, 8))
+gs = gridspec.GridSpec(1, 2, figure = fig)
+sub_gs = gridspec.GridSpecFromSubplotSpec(3, 3, subplot_spec=gs[1])
+
+ax1 = fig.add_subplot(gs[0])
+ax1.imshow(orig)
+
+for i in range(3):
+    for j in range(3):
+        ax2 = fig.add_subplot(sub_gs[i, j])
+        plt.axis('off')        
+        plt.imshow(features[0, :, :, np.random.randint(n_features)], cmap = 'gray')  
 
 
 # In[137]:
@@ -194,7 +249,7 @@ y_pred = np.argmax(y_pred, axis=1)
 y_pred
 
 
-# In[120]:
+# In[16]:
 
 
 from tensorflow.keras.models import load_model
@@ -202,7 +257,7 @@ from tensorflow.keras.preprocessing import image
 import matplotlib.image as mpimg
 
 
-# In[147]:
+# In[17]:
 
 
 img1 = mpimg.imread("D:/computer science/level3/semester 2/selected 2/selected2/Datasets/Test/mercedes/29.jpg")
@@ -210,17 +265,17 @@ imgplot = plt.imshow(img1)
 plt.show()
 
 
-# In[148]:
+# In[18]:
 
 
 MODEL_PATH ='D:/computer science/level3/semester 2/selected 2/selected2/model_resnet50.h5'
 model = load_model(MODEL_PATH)
 
 
-# In[149]:
+# In[19]:
 
 
-img_path = "D:/computer science/level3/semester 2/selected 2/selected2/Datasets/Test/mercedes/29.jpg"
+img_path = "D:/computer science/level3/semester 2/selected 2/selected2/Datasets/Train/mercedes/17.jpg"
 img = image.load_img(img_path, target_size=(224, 224))
 x = image.img_to_array(img)
 x=x/255
